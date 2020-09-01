@@ -1,0 +1,26 @@
+openapi: "3.0.2"
+info:
+  title: Products
+  version: "1.0"
+
+components:
+  schemas:
+    product:
+      description: Product
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+
+paths:
+  /:
+    get:
+      responses:
+        "200":
+          description: OK response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/product"
