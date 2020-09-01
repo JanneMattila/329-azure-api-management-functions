@@ -75,34 +75,6 @@
       ]
     },
     {
-      "name": "apiUsersTemplate",
-      "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2019-10-01",
-      "properties": {
-        "mode": "Incremental",
-        "templateLink": {
-          "uri": "[concat(parameters('templateUrl'), 'api/users/api.json', parameters('templateToken'))]"
-        },
-        "parameters": {
-          "apimName": {
-            "value": "[parameters('apimName')]"
-          },
-          "templateUrl": {
-            "value": "[parameters('templateUrl')]"
-          },
-          "templateToken": {
-            "value": "[parameters('templateToken')]"
-          },
-          "location": {
-            "value": "[parameters('location')]"
-          }
-        }
-      },
-      "dependsOn": [
-        "[parameters('apimName')]"
-      ]
-    },
-    {
       "name": "apiProductsTemplate",
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2019-10-01",
