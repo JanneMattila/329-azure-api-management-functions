@@ -6,7 +6,7 @@ them as APIs:
 
 ![architecture](https://user-images.githubusercontent.com/2357647/91958498-1a9d5680-ed10-11ea-8bc4-be5d63564033.png)
 
-The *glue* that is between API Management is Azure Functions app _Csv Converter_ that is
+The *glue* between API Management and csv files is Azure Functions app _Csv Converter_ that is
 responsible of fetching the csv file and corresponding mapping file. It then uses
 information from mapping file to convert csv data to json response. 
 

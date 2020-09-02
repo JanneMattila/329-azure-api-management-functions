@@ -34,6 +34,6 @@ POST {{func}}/api/csv HTTP/1.1
 Content-type: application/json
 
 {
-  "csv": "https://.../files/data.csv",
-  "map": "https://.../files/data_map.json"
+  "csv": "https://mylogicapps9000.blob.core.windows.net/files/data.csv",
+  "map": "https://mylogicapps9000.blob.core.windows.net/files/data_map.json"
 }
