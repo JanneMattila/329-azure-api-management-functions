@@ -27,6 +27,12 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "release", "release", "{EC9C
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CsvConverter", "src\CsvConverter\CsvConverter.csproj", "{02E48A76-04A0-4FBD-A7A5-A26B2A921D29}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "doc", "doc", "{A4DCAEE4-6898-4436-971B-50D3255D0C10}"
+	ProjectSection(SolutionItems) = preProject
+		doc\data.csv = doc\data.csv
+		doc\data_map.json = doc\data_map.json
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -45,6 +51,7 @@ Global
 		{7F48B88A-6EC7-4AA2-84C5-CAC112F80102} = {70D80D12-0F5B-4966-9543-5304131A9000}
 		{EC9C2024-7F3E-4C94-B592-9BC6A96AB14E} = {70D80D12-0F5B-4966-9543-5304131A9000}
 		{02E48A76-04A0-4FBD-A7A5-A26B2A921D29} = {E74445DD-28F2-4920-961A-C3778DA73664}
+		{A4DCAEE4-6898-4436-971B-50D3255D0C10} = {7B2AAD5E-368D-44EC-9215-418C718128CD}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {F99521D6-99C8-41D7-83DC-3D5523498EE7}
