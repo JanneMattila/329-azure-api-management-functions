@@ -1,14 +1,18 @@
-[
-  {
-    "name": "ID",
-    "type": "integer"
-  },
-  {
-    "name": "Name",
-    "type": "string"
-  },
-  {
-    "name": "Description",
-    "type": "string"
-  }
-]
+{
+  "delimiter": ",",
+  "useQuotes": false,
+  "fieldMappings": [
+    {
+      "name": "ID",
+      "type": "integer"
+    },
+    {
+      "name": "Name",
+      "type": "string"
+    },
+    {
+      "name": "Description",
+      "type": "string"
+    }
+  ]
+}

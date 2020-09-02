@@ -42,17 +42,17 @@ namespace CsvConverter
             }
 
             var csvContent = await _client.GetStringAsync(request.CsvUri);
-            var mapContent = await _client.GetFromJsonAsync<FieldMapping[]>(request.MapUri);
+            var mapContent = await _client.GetFromJsonAsync<Map>(request.MapUri);
 
             using var reader = new StringReader(csvContent);
             using var parser = new TextFieldParser(reader);
 
-            parser.SetDelimiters(new string[] { ",", "\t" });
-            parser.HasFieldsEnclosedInQuotes = true;
+            parser.SetDelimiters(new string[] { mapContent.Delimiter });
+            parser.HasFieldsEnclosedInQuotes = mapContent.UseQuotes;
 
             var headers = parser.ReadFields();
 
-            var sharedFields = mapContent.Select(m => m.Name).Union(headers).Count();
+            var sharedFields = mapContent.FieldMappings.Select(m => m.Name).Union(headers).Count();
             if (sharedFields != headers.Length)
             {
                 return new BadRequestObjectResult(
@@ -63,9 +63,9 @@ namespace CsvConverter
             }
 
             var map = new Dictionary<string, MapType>();
-            foreach (var mapItem in mapContent)
+            foreach (var mapping in mapContent.FieldMappings)
             {
-                var type = mapItem.Type switch
+                var type = mapping.Type switch
                 {
                     "string" => MapType.String,
                     "integer" => MapType.Integer,
@@ -74,7 +74,7 @@ namespace CsvConverter
                     _ => MapType.String
                 };
 
-                map.Add(mapItem.Name, type);
+                map.Add(mapping.Name, type);
             }
 
             using var output = new MemoryStream();
