@@ -7,6 +7,8 @@ using Microsoft.Extensions.Logging;
 using CsvConverter.Interfaces;
 using System.Text.Json;
 using System.Net.Http;
+using System.IO;
+using Microsoft.VisualBasic.FileIO;
 
 namespace CsvConverter
 {
@@ -19,10 +21,9 @@ namespace CsvConverter
             [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = null)] HttpRequest req,
             ILogger log)
         {
-            log.LogInformation("C# HTTP trigger function processed a request.");
+            log.LogInformation("Csv converter function processed a request.");
 
             var request = await JsonSerializer.DeserializeAsync<FileRequest>(req.Body);
-
             if (request is null || 
                 string.IsNullOrWhiteSpace(request.Uri))
             {
@@ -33,12 +34,24 @@ namespace CsvConverter
                     });
             }
 
-            var data = await _client.GetStringAsync(request.Uri);
+            var csv = await _client.GetStringAsync(request.Uri);
+
+            using var reader = new StringReader(csv);
+            using var parser = new TextFieldParser(reader);
+
+            parser.SetDelimiters(new string[] { ",", "\t" });
+            parser.HasFieldsEnclosedInQuotes = true;
+
+            var header = parser.ReadFields();
+            while (!parser.EndOfData)
+            {
+                var data = parser.ReadFields();
+            }
 
             return new OkObjectResult(
                 new
                 {
-                    length = data.Length
+                    length = csv.Length
                 });
         }
     }
