@@ -1,7 +1,7 @@
 [
   {
     "name": "ID",
-    "type": "int"
+    "type": "integer"
   },
   {
     "name": "Name",

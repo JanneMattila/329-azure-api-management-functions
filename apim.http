@@ -1,4 +1,5 @@
-@apim = https://contosoapim3-local.azure-api.net
+@apim = https://contosoapim4-local.azure-api.net
+@func = http://localhost:7071
 
 ### Invalid user
 POST {{apim}}/users HTTP/1.1
@@ -27,3 +28,12 @@ Content-type: application/json
 ### Get products
 GET {{apim}}/products HTTP/1.1
 Content-type: application/json
+
+### Get csv data using map
+POST {{func}}/api/csv HTTP/1.1
+Content-type: application/json
+
+{
+  "csv": "https://.../files/data.csv",
+  "map": "https://.../files/data_map.json"
+}

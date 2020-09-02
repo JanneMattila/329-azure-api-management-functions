@@ -14,6 +14,7 @@ using System.Net.Http.Json;
 using System.Linq;
 using System.Collections.Generic;
 using System;
+using System.Net.Mime;
 
 namespace CsvConverter
 {
@@ -138,10 +139,18 @@ namespace CsvConverter
 
                 writer.WriteEndObject();
             }
-            writer.WriteEndArray();
 
+            writer.WriteEndArray();
+            await writer.FlushAsync();
+
+            output.Seek(0, SeekOrigin.Begin);
             var json = Encoding.UTF8.GetString(output.ToArray());
-            return new OkObjectResult(json);
+            return new ContentResult()
+            {
+                Content = json,
+                ContentType = MediaTypeNames.Application.Json,
+                StatusCode = StatusCodes.Status200OK
+            };
         }
     }
 }
