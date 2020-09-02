@@ -9,6 +9,9 @@ using System.Text.Json;
 using System.Net.Http;
 using System.IO;
 using Microsoft.VisualBasic.FileIO;
+using System.Text;
+using System.Net.Http.Json;
+using System.Linq;
 
 namespace CsvConverter
 {
@@ -25,16 +28,18 @@ namespace CsvConverter
 
             var request = await JsonSerializer.DeserializeAsync<FileRequest>(req.Body);
             if (request is null || 
-                string.IsNullOrWhiteSpace(request.Uri))
+                string.IsNullOrWhiteSpace(request.CsvUri) ||
+                string.IsNullOrWhiteSpace(request.MapUri))
             {
                 return new BadRequestObjectResult(
                     new
                     {
-                        error = "Missing required query parameter 'uri'."
+                        error = "Missing mandatory parameters."
                     });
             }
 
-            var csv = await _client.GetStringAsync(request.Uri);
+            var csv = await _client.GetStringAsync(request.CsvUri);
+            var map = await _client.GetFromJsonAsync<FieldMapping[]>(request.MapUri);
 
             using var reader = new StringReader(csv);
             using var parser = new TextFieldParser(reader);
@@ -42,17 +47,41 @@ namespace CsvConverter
             parser.SetDelimiters(new string[] { ",", "\t" });
             parser.HasFieldsEnclosedInQuotes = true;
 
-            var header = parser.ReadFields();
-            while (!parser.EndOfData)
+            var headers = parser.ReadFields();
+
+            var sharedFields = map.Select(m => m.Name).Union(headers).Count();
+            if (sharedFields != headers.Length)
             {
-                var data = parser.ReadFields();
+                return new BadRequestObjectResult(
+                    new
+                    {
+                        error = "Invalid map file for given csv file."
+                    });
             }
 
-            return new OkObjectResult(
-                new
+            using var output = new MemoryStream();
+            using var writer = new Utf8JsonWriter(output);
+
+            writer.WriteStartArray();
+            while (!parser.EndOfData)
+            {
+                var fields = parser.ReadFields();
+
+                writer.WriteStartObject();
+                for (int i = 0; i < headers.Length; i++)
                 {
-                    length = csv.Length
-                });
+                    var header = headers[i];
+                    var field = fields[i];
+
+                    writer.WriteString(header, field);
+                }
+
+                writer.WriteEndObject();
+            }
+            writer.WriteEndArray();
+
+            var json = Encoding.UTF8.GetString(output.ToArray());
+            return new OkObjectResult(json);
         }
     }
 }
