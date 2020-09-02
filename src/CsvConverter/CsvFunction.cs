@@ -12,6 +12,8 @@ using Microsoft.VisualBasic.FileIO;
 using System.Text;
 using System.Net.Http.Json;
 using System.Linq;
+using System.Collections.Generic;
+using System;
 
 namespace CsvConverter
 {
@@ -38,10 +40,10 @@ namespace CsvConverter
                     });
             }
 
-            var csv = await _client.GetStringAsync(request.CsvUri);
-            var map = await _client.GetFromJsonAsync<FieldMapping[]>(request.MapUri);
+            var csvContent = await _client.GetStringAsync(request.CsvUri);
+            var mapContent = await _client.GetFromJsonAsync<FieldMapping[]>(request.MapUri);
 
-            using var reader = new StringReader(csv);
+            using var reader = new StringReader(csvContent);
             using var parser = new TextFieldParser(reader);
 
             parser.SetDelimiters(new string[] { ",", "\t" });
@@ -49,7 +51,7 @@ namespace CsvConverter
 
             var headers = parser.ReadFields();
 
-            var sharedFields = map.Select(m => m.Name).Union(headers).Count();
+            var sharedFields = mapContent.Select(m => m.Name).Union(headers).Count();
             if (sharedFields != headers.Length)
             {
                 return new BadRequestObjectResult(
@@ -57,6 +59,21 @@ namespace CsvConverter
                     {
                         error = "Invalid map file for given csv file."
                     });
+            }
+
+            var map = new Dictionary<string, MapType>();
+            foreach (var mapItem in mapContent)
+            {
+                var type = mapItem.Type switch
+                {
+                    "string" => MapType.String,
+                    "integer" => MapType.Integer,
+                    "number" => MapType.Number,
+                    "datetime" => MapType.DateTime,
+                    _ => MapType.String
+                };
+
+                map.Add(mapItem.Name, type);
             }
 
             using var output = new MemoryStream();
@@ -72,8 +89,51 @@ namespace CsvConverter
                 {
                     var header = headers[i];
                     var field = fields[i];
+                    var fieldMap = map[header];
 
-                    writer.WriteString(header, field);
+                    if (string.IsNullOrEmpty(field))
+                    {
+                        writer.WriteNull(header);
+                    }
+                    else
+                    {
+                        switch (fieldMap)
+                        {
+                            case MapType.Integer:
+                                if (int.TryParse(field, out var intResult))
+                                {
+                                    writer.WriteNumber(header, intResult);
+                                }
+                                else
+                                {
+                                    writer.WriteNull(header);
+                                }
+                                break;
+                            case MapType.Number:
+                                if (double.TryParse(field, out var doubleResult))
+                                {
+                                    writer.WriteNumber(header, doubleResult);
+                                }
+                                else
+                                {
+                                    writer.WriteNull(header);
+                                }
+                                break;
+                            case MapType.DateTime:
+                                if (DateTime.TryParse(field, out var dateResult))
+                                {
+                                    writer.WriteString(header, dateResult);
+                                }
+                                else
+                                {
+                                    writer.WriteNull(header);
+                                }
+                                break;
+                            default:
+                                writer.WriteString(header, field);
+                                break;
+                        }
+                    }
                 }
 
                 writer.WriteEndObject();
